@@ -268,7 +268,7 @@ implementation=$(python3 -c "import sys; print(sys.implementation.name)")
 if [ "$implementation" == "cpython" ]; then REPOS="${REPOS} $REPOS_CPYTHON"; fi
 
 # Install build dependencies until build isolation can be enabled
-pip3 install -U pip "setuptools>=59" wheel cffi unicorn==1.0.2rc4
+pip_install -U pip "setuptools>=59" wheel cffi unicorn==1.0.2rc4
 
 function try_remote
 {
@@ -322,6 +322,9 @@ function clone_repo
 
 function pip_install
 {
+		# Use --user flag if not using a venv
+		if [ -n "$VIRTUAL_ENV" ]; then USER_FLAG="--user"; else USER_FLAG=""; fi
+
         debug "pip-installing: $@."
         if ! pip3 install $PIP_OPTIONS $@
         then
@@ -404,7 +407,7 @@ then
 	for PACKAGE in $TO_INSTALL; do
 		info "Installing $PACKAGE."
 		[ -n "${EXTRA_DEPS[$PACKAGE]}" ] && pip_install ${EXTRA_DEPS[$PACKAGE]}
-		pip_install --no-build-isolation -e $PACKAGE
+		pip_install --no-build-isolation -e ./$PACKAGE
 	done
 
 	info "Installing some other helpful stuff"
